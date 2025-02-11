@@ -1,11 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-kapt")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
     namespace = "ru.pugovishnikova.example.avitotesttaskapp"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "ru.pugovishnikova.example.avitotesttaskapp"
@@ -50,6 +52,30 @@ android {
 }
 
 dependencies {
+
+    //Dagger-Hilt
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.storage)
+    kapt(libs.hilt.compiler)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Lifecycles
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    // Compose additions
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+
+    //Glide
+    implementation(libs.glide)
+
+    //Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.gson)
+    implementation(libs.converter.gson)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
