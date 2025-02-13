@@ -1,8 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt")
-    id("dagger.hilt.android.plugin")
+//    id("kotlin-kapt")
+//    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -23,12 +23,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"https://api.deezer.com\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "BASE_URL", "\"https://api.deezer.com\"")
         }
     }
     compileOptions {
@@ -39,6 +43,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
@@ -52,11 +57,16 @@ android {
 }
 
 dependencies {
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.androidx.compose.navigation)
 
-    //Dagger-Hilt
-    implementation(libs.hilt.android)
-    implementation(libs.androidx.storage)
-    kapt(libs.hilt.compiler)
+
+//    //Dagger-Hilt
+//    implementation(libs.hilt.android)
+//    implementation(libs.androidx.storage)
+//    kapt(libs.hilt.compiler)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
@@ -69,13 +79,17 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
 
-    //Glide
-    implementation(libs.glide)
+//    //Coil
+//    implementation(libs.coil.compose)
+//    implementation(libs.coil.network.okhttp)
 
     //Retrofit
     implementation(libs.retrofit)
-    implementation(libs.gson)
     implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
+    //Serialization
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
