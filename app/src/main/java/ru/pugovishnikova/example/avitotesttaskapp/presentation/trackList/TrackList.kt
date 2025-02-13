@@ -1,5 +1,7 @@
 package ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList
 
+import android.content.Context
+import android.widget.ImageView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,11 +18,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
 import ru.pugovishnikova.example.avitotesttaskapp.R
 
 
 @Composable
-fun TrackList (
+fun TrackList(
     track: TrackUi,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -34,16 +40,32 @@ fun TrackList (
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-//        Glide.with(context)
-//            .load(track.album.cover_xl) // Используем URL изображения // Заглушка на время загрузки
-//            .error(R.drawable.stub_icon) // Заглушка на случай ошибки
-//            .into(imageView)
-        Image(
-
-            painter = painterResource(id = R.drawable.stub_icon),
-            contentDescription = track.title,
-            modifier = Modifier.size(85.dp)
+        AndroidView(
+            factory = { ctx: Context ->
+                ImageView(ctx).apply {
+                    scaleType = ImageView.ScaleType.CENTER_CROP
+                }
+            },
+            update = { imageView ->
+                Glide.with(context)
+                    .load(track.imageId)
+                    .apply(
+                        RequestOptions()
+                            .placeholder(R.drawable.stub_icon)
+                            .error(R.drawable.stub_icon)
+                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    )
+                    .into(imageView)
+            },
+            modifier = Modifier.size(85.dp, 85.dp)
         )
+
+//        Image(
+//
+//            painter = painterResource(id = R.drawable.stub_icon),
+//            contentDescription = track.title,
+//            modifier = Modifier.size(85.dp)
+//        )
         Column(
             modifier.weight(1f)
         ) {

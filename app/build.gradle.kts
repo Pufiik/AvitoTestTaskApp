@@ -79,6 +79,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
 
+
+    // Glide
+    implementation(libs.glide)
+    implementation(libs.compose)
 //    //Coil
 //    implementation(libs.coil.compose)
 //    implementation(libs.coil.network.okhttp)
