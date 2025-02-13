@@ -80,16 +80,18 @@ dependencies {
     // Compose additions
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+
+    // Icons
     implementation(libs.androidx.compose.material)
 
-    //Icons
+
+    // Navigation
+    implementation(libs.androidx.compose.material3.adaptive.navigation)
 
     // Glide
     implementation(libs.glide)
     implementation(libs.compose)
-//    //Coil
-//    implementation(libs.coil.compose)
-//    implementation(libs.coil.network.okhttp)
+
 
     //Retrofit
     implementation(libs.retrofit)

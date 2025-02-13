@@ -35,7 +35,6 @@ class TrackViewModel (
             is TrackListAction.OnTrackClick -> {
                 _state.update { it.copy(
                     selectedTrack = action.track
-
                 ) }
             }
         }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
@@ -44,12 +45,13 @@ import com.bumptech.glide.request.RequestOptions
 import kotlinx.coroutines.delay
 import ru.pugovishnikova.example.avitotesttaskapp.R
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListState
-import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackUi
+
 
 @Composable
 fun TrackDetailScreen(
     state: TrackListState,
-    modifier: Modifier
+    modifier: Modifier,
+    onClickButtonBack: () -> Unit
 ) {
     val context = LocalContext.current
     if (state.isLoading) {
@@ -79,6 +81,21 @@ fun TrackDetailScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                IconButton(onClick = onClickButtonBack) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBackIosNew,
+                        contentDescription = R.string.push_back.toString(),
+                        tint = Color.White
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
             AndroidView(
                 factory = { ctx: Context ->
@@ -156,24 +173,4 @@ private fun formatTime(seconds: Int): String {
     val minutes = seconds / 60
     val sec = seconds % 60
     return String.format("%02d:%02d", minutes, sec)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TrackPlayerScreenPreview() {
-    TrackDetailScreen(
-        TrackListState(
-            false,
-            emptyList(),
-            TrackUi(
-                "1",
-                "title",
-                "author-1",
-                123,
-                "alb-1",
-                "art-1"
-                )
-        ),
-        Modifier
-    )
 }

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">AvitoTestTaskApp</string>
-    <string name="serialization_error">The error in serialization data</string>
-    <string name="no_internet">No internet</string>
-    <string name="no_fetching_data">No music</string>
+    <string name="serialization_error">Ошибка сериализации</string>
+    <string name="no_internet">Отсутствие подключения к интернету</string>
+    <string name="no_fetching_data">Музыка недоступна</string>
+    <string name="push_back">Вернуться назад</string>
 </resources>
