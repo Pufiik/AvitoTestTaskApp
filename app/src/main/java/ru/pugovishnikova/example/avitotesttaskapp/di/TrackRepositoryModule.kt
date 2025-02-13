@@ -12,6 +12,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.data.repository.TrackRepositor
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackRepository
 import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetAllTracksUseCase
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackUseCases
+import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.SearchTracksUseCase
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackViewModel
 import java.util.concurrent.TimeUnit
 
@@ -83,5 +84,6 @@ val viewModelModule = module {
 
 val useCasesModule = module {
     singleOf(::GetAllTracksUseCase)
+    singleOf(::SearchTracksUseCase)
     singleOf(::TrackUseCases)
 }

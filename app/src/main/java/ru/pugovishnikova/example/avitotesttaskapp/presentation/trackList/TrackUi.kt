@@ -1,4 +1,5 @@
 package ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList
+import ru.pugovishnikova.example.avitotesttaskapp.data.utils.SearchTrack
 import ru.pugovishnikova.example.avitotesttaskapp.data.utils.Track
 
 
@@ -12,6 +13,15 @@ data class TrackUi (
 )
 
 fun Track.toTrackUi(): TrackUi = TrackUi(
+    title = title,
+    authorName = artist?.name?:"Unknown",
+    imageId = album?.coverXl?:"1",
+    duration = duration?:0,
+    albumTitle = album?.title,
+    artistName = artist?.name?:"Unknown"
+)
+
+fun SearchTrack.toTrackUi(): TrackUi = TrackUi(
     title = title,
     authorName = artist?.name?:"Unknown",
     imageId = album?.coverXl?:"1",
