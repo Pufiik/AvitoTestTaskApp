@@ -3,9 +3,9 @@ package ru.pugovishnikova.example.avitotesttaskapp.domain
 import AlbumDto
 import ArtistDto
 import TrackDto
-import ru.pugovishnikova.example.avitotesttaskapp.domain.model.Album
-import ru.pugovishnikova.example.avitotesttaskapp.domain.model.Artist
-import ru.pugovishnikova.example.avitotesttaskapp.domain.model.Track
+import ru.pugovishnikova.example.avitotesttaskapp.data.utils.Album
+import ru.pugovishnikova.example.avitotesttaskapp.data.utils.Artist
+import ru.pugovishnikova.example.avitotesttaskapp.data.utils.Track
 
 fun TrackDto.toTrack(): Track {
     return Track(

@@ -57,6 +57,8 @@ android {
 }
 
 dependencies {
+
+    //Koin
     implementation(project.dependencies.platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.koin.androidx.compose)
@@ -78,7 +80,9 @@ dependencies {
     // Compose additions
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.material)
 
+    //Icons
 
     // Glide
     implementation(libs.glide)

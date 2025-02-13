@@ -1,4 +1,4 @@
-package ru.pugovishnikova.example.avitotesttaskapp.domain.model
+package ru.pugovishnikova.example.avitotesttaskapp.data.utils
 data class Track(
     val id: Long,
     val title: String,

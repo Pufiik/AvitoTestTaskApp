@@ -15,10 +15,12 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun TrackListScreen (
+fun TrackListScreen(
     state: TrackListState,
+    onAction: (TrackListAction) -> Unit,
     modifier: Modifier = Modifier,
-){
+) {
+
     if (state.isLoading) {
         Box(
             modifier = modifier
@@ -28,17 +30,17 @@ fun TrackListScreen (
             CircularProgressIndicator()
         }
     } else {
-            LazyColumn(
-                modifier = modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(state.tracks) { trackUi ->
-                    TrackList(
-                        track = trackUi,
-                        onClick = {},
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    HorizontalDivider()
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(state.tracks) { trackUi ->
+                TrackList(
+                    track = trackUi,
+                    onClick = {onAction(TrackListAction.OnTrackClick(trackUi))},
+                    modifier = Modifier.fillMaxWidth()
+                )
+                HorizontalDivider()
 
             }
         }
