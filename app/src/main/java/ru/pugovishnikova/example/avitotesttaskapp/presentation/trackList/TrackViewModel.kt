@@ -35,6 +35,7 @@ class TrackViewModel(
     fun onAction(action: TrackListAction) {
         when (action) {
             is TrackListAction.OnTrackClick -> {
+                action.navigate()
                 _state.update {
                     it.copy(
                         selectedTrack = action.track

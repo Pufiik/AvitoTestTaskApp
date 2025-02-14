@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 fun TrackListScreen(
     state: TrackListState,
     onAction: (TrackListAction) -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
@@ -64,7 +65,7 @@ fun TrackListScreen(
                 items(state.tracks) { trackUi ->
                     TrackList(
                         track = trackUi,
-                        onClick = { onAction(TrackListAction.OnTrackClick(trackUi)) },
+                        onClick = { onAction(TrackListAction.OnTrackClick(trackUi, onClick)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                     HorizontalDivider()

@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import org.koin.androidx.compose.koinViewModel
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListEvent
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListScreen
@@ -20,6 +23,7 @@ fun AdaptiveTrackListDetailPane(
 ) {
     val state = trackViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val controller = rememberNavController()
     ObserveAsEvents(events = trackViewModel.events) { event ->
         when (event) {
             is TrackListEvent.Error -> {
@@ -31,20 +35,30 @@ fun AdaptiveTrackListDetailPane(
             }
         }
     }
-    when {
-        state.value.selectedTrack != null -> {
+
+    NavHost(
+        navController = controller,
+        startDestination = Screens.getTrackListScreen()
+    ) {
+        composable(Screens.getTrackListScreen()) {
+            TrackListScreen(
+                state = state.value,
+                onAction = { action ->
+                    trackViewModel.onAction(action)
+                },
+                onClick = { controller.navigate(Screens.getTrackDetailScreen()) }
+            )
+        }
+        composable(Screens.getTrackDetailScreen()){
             TrackDetailScreen(
                 state = state.value,
                 modifier = modifier
             ) {}
         }
-        else -> {
-            TrackListScreen(
-                state = state.value,
-                onAction = { action ->
-                    trackViewModel.onAction(action)
-                }
-            )
-        }
     }
+}
+
+object Screens {
+    fun getTrackListScreen() = "TrackListScreen"
+    fun getTrackDetailScreen() = "TrackDetailScreen"
 }

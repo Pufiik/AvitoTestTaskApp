@@ -84,10 +84,6 @@ dependencies {
     // Icons
     implementation(libs.androidx.compose.material)
 
-
-    // Navigation
-    implementation(libs.androidx.compose.material3.adaptive.navigation)
-
     // Glide
     implementation(libs.glide)
     implementation(libs.compose)
