@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -38,26 +39,72 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import ru.pugovishnikova.example.avitotesttaskapp.R
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.ReloadScreen
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListAction
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListState
 
 
-
 @Composable
 fun TrackDetailScreen(
     state: TrackListState,
     modifier: Modifier,
-    onAction: (TrackListAction) -> Unit,
     onClick: () -> Unit,
+    onAction: (TrackListAction) -> Unit,
     onClickButtonBack: () -> Unit
 ) {
     val context = LocalContext.current
+
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .setUsage(C.USAGE_MEDIA)
+                    .build(),
+                true
+            )
+            playWhenReady = true
+        }
+    }
+
+    var isPlaying by remember { mutableStateOf(true) }
+    var currentPosition by remember { mutableIntStateOf(0) }
+
+    // При смене трека сбрасываем позицию
+    LaunchedEffect(state.selectedTrack) {
+        state.selectedTrack?.preview.let { url ->
+            val mediaItem = MediaItem.fromUri(url!!)
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.seekTo(0) // Сброс позиции
+            currentPosition = 0 // Сбрасываем слайдер
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = true // Гарантированно начинаем играть
+            isPlaying = true
+        }
+    }
+
+    LaunchedEffect(isPlaying) {
+        while ((isPlaying || exoPlayer.isPlaying) && currentPosition < state.selectedTrack?.duration!!) {
+            delay(1000)
+            currentPosition++
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { exoPlayer.release() }
+    }
+
+
     if (state.isLoading) {
         Box(
             modifier = modifier
@@ -66,18 +113,8 @@ fun TrackDetailScreen(
         ) {
             CircularProgressIndicator()
         }
-    } else if (!state.isError && state.selectedTrack!=null) {
+    } else if (state.selectedTrack != null && !state.isError) {
         val track = state.selectedTrack
-        var isPlaying by remember { mutableStateOf(false) }
-        var currentPosition by remember { mutableIntStateOf(0) }
-
-        LaunchedEffect(isPlaying) {
-            while (isPlaying && currentPosition < track.duration) {
-                delay(1000)
-                currentPosition++
-            }
-        }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -130,8 +167,11 @@ fun TrackDetailScreen(
 
             Slider(
                 value = currentPosition.toFloat(),
-                onValueChange = { newValue -> currentPosition = newValue.toInt() },
-                valueRange = 0f..track.duration.toFloat(),
+                onValueChange = { newValue ->
+                    currentPosition = newValue.toInt()
+                    exoPlayer.seekTo((newValue * 1000).toLong())
+                },
+                valueRange = 0f..(state.selectedTrack.duration.toFloat()),
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
@@ -147,30 +187,39 @@ fun TrackDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
-                IconButton(onClick = { /* Предыдущий трек */ }) {
+                IconButton(onClick = {
+                    currentPosition = 0
+                    onAction(TrackListAction.OnPrevClick)
+                }) {
                     Icon(
                         imageVector = Icons.Filled.SkipPrevious,
-                        contentDescription = "Назад",
+                        contentDescription = "Предыдущий трек",
                         tint = Color.White
                     )
                 }
-                IconButton(onClick = { isPlaying = !isPlaying }) {
+                IconButton(onClick = {
+                    isPlaying = !isPlaying
+                    exoPlayer.playWhenReady = isPlaying
+                }) {
                     Icon(
                         imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                         contentDescription = "Пауза/Воспроизведение",
                         tint = Color.White
                     )
                 }
-                IconButton(onClick = { /* Следующий трек */ }) {
+                IconButton(onClick = {
+                    currentPosition = 0
+                    onAction(TrackListAction.OnNextClick)
+                }) {
                     Icon(
                         imageVector = Icons.Filled.SkipNext,
-                        contentDescription = "Далее",
+                        contentDescription = "Следующий трек",
                         tint = Color.White
                     )
                 }
             }
         }
-    } else if (state.tracks.isEmpty()){
+    } else {
         ReloadScreen { onAction(TrackListAction.OnBackClick(onClick)) }
     }
 }
@@ -178,5 +227,5 @@ fun TrackDetailScreen(
 private fun formatTime(seconds: Int): String {
     val minutes = seconds / 60
     val sec = seconds % 60
-    return String.format("%02d:%02d", minutes, sec)
+    return "%d:%02d".format(minutes, sec)
 }

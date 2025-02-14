@@ -23,6 +23,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.util.onSuccess
 class TrackViewModel(
     private val trackUseCases: TrackUseCases
 ) : ViewModel() {
+    private var currentTrackIndex: Int = 0
     private val _state = MutableStateFlow(TrackListState())
     val state = _state
         .onStart { getAllTracks() }
@@ -35,24 +36,34 @@ class TrackViewModel(
     fun onAction(action: TrackListAction) {
         when (action) {
             is TrackListAction.OnTrackClick -> {
+                _state.update {
+                    it.copy(
+                        selectedTrack = action.track
+                    )
+                }
                 getTrackById(action.track.id)
                 action.navigate()
-//                _state.update {
-//                    it.copy(
-//                        selectedTrack = action.track
-//                    )
-//                }
             }
 
             is TrackListAction.OnSearchButtonClick -> {
                 val query = action.query
                 searchTracksByName(query)
             }
+
             is TrackListAction.OnReloadButtonClick -> {
                 getAllTracks()
             }
+
             is TrackListAction.OnBackClick -> {
                 action.navigate()
+            }
+
+            is TrackListAction.OnNextClick -> {
+                playNextTrack()
+            }
+
+            is TrackListAction.OnPrevClick -> {
+                playPreviousTrack()
             }
         }
     }
@@ -104,11 +115,13 @@ class TrackViewModel(
             withContext(Dispatchers.IO) {
                 trackUseCases.getTrackByIdUseCase.invoke(id)
                     .onSuccess { track ->
+                        val trackU = track.toTrackUi()
+                        val flag = (trackU.imageId == null)
                         _state.update {
                             it.copy(
                                 isLoading = false,
                                 isError = false,
-                                selectedTrack = track.toTrackUi()
+                                selectedTrack = if (flag) state.value.selectedTrack else track.toTrackUi()
                             )
                         }
                     }
@@ -160,6 +173,29 @@ class TrackViewModel(
                         _events.send(TrackListEvent.Error(error))
                     }
             }
+        }
+    }
+
+    fun playNextTrack() {
+        if (currentTrackIndex < state.value.tracks.size - 1) {
+            currentTrackIndex++
+            updateTrack()
+        }
+    }
+
+    fun playPreviousTrack() {
+        if (currentTrackIndex > 0) {
+            currentTrackIndex--
+            updateTrack()
+        }
+    }
+
+    private fun updateTrack() {
+        val newTrack = state.value.tracks[currentTrackIndex]
+        _state.update {
+            it.copy(
+                selectedTrack = newTrack
+            )
         }
     }
 }

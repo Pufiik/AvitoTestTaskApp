@@ -7,12 +7,14 @@ import ru.pugovishnikova.example.avitotesttaskapp.util.Utils
 
 data class TrackUi (
     val id: Long,
-    val imageId: String,
+    val imageId: String?,
     val title: String,
     val authorName: String,
     val duration: Int,
     val albumTitle: String?,
-    val artistName: String
+    val artistName: String,
+    val preview: String,
+    val pos: Int = -1
 )
 
 fun Track.toTrackUi(): TrackUi = TrackUi(
@@ -23,6 +25,7 @@ fun Track.toTrackUi(): TrackUi = TrackUi(
     duration = duration?:0,
     albumTitle = album?.title,
     artistName = artist?.name?:Utils.getAuthorName(),
+    preview = preview?:Utils.getEmptyString()
 )
 
 fun SearchTrack.toTrackUi(): TrackUi = TrackUi(
@@ -33,14 +36,16 @@ fun SearchTrack.toTrackUi(): TrackUi = TrackUi(
     duration = duration?:0,
     albumTitle = album?.title,
     artistName = artist?.name?:Utils.getAuthorName(),
+    preview = preview?:Utils.getEmptyString()
 )
 
 fun TrackInfo.toTrackUi(): TrackUi = TrackUi(
     id = id,
     title = title,
     authorName = artist?.name?:Utils.getAuthorName(),
-    imageId = album?.coverXl?: Utils.getImageId(),
+    imageId = album?.coverXl,
     duration = duration?:0,
     albumTitle = album?.title,
     artistName = artist?.name?:Utils.getAuthorName(),
+    preview = preview?:Utils.getEmptyString()
 )

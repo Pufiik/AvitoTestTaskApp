@@ -88,6 +88,9 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.compose)
 
+    //ExoPlayer
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
 
     //Retrofit
     implementation(libs.retrofit)

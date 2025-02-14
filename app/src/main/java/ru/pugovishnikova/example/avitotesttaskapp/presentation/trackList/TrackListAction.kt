@@ -5,4 +5,6 @@ sealed interface TrackListAction {
     data class OnSearchButtonClick(val query: String) : TrackListAction
     data object OnReloadButtonClick : TrackListAction
     data class OnBackClick(val navigate: () -> Unit) : TrackListAction
+    data object OnPrevClick : TrackListAction
+    data object OnNextClick : TrackListAction
 }
