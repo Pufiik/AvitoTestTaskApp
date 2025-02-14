@@ -13,6 +13,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackRepository
 import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetAllTracksUseCase
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackUseCases
 import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.SearchTracksUseCase
+import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetTrackByIdUseCase
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackViewModel
 import java.util.concurrent.TimeUnit
 
@@ -63,11 +64,6 @@ fun provideService(retrofit: Retrofit): TrackApiService =
 
 
 val networkModule = module {
-//    single { provideHttpClient() }
-//    single { provideConverterFactory() }
-//    single { provideRetrofit(get(),get()) }
-//    single { provideService(get()) }
-
     singleOf(::provideHttpClient)
     singleOf(::provideConverterFactory)
     singleOf(::provideRetrofit)
@@ -85,5 +81,6 @@ val viewModelModule = module {
 val useCasesModule = module {
     singleOf(::GetAllTracksUseCase)
     singleOf(::SearchTracksUseCase)
+    singleOf(::GetTrackByIdUseCase)
     singleOf(::TrackUseCases)
 }

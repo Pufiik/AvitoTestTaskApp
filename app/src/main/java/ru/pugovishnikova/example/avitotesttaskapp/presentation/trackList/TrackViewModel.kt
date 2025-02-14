@@ -35,12 +35,13 @@ class TrackViewModel(
     fun onAction(action: TrackListAction) {
         when (action) {
             is TrackListAction.OnTrackClick -> {
+                getTrackById(action.track.id)
                 action.navigate()
-                _state.update {
-                    it.copy(
-                        selectedTrack = action.track
-                    )
-                }
+//                _state.update {
+//                    it.copy(
+//                        selectedTrack = action.track
+//                    )
+//                }
             }
 
             is TrackListAction.OnSearchButtonClick -> {
@@ -67,6 +68,35 @@ class TrackViewModel(
                             it.copy(
                                 isLoading = false,
                                 tracks = tracks.map { track -> track.toTrackUi() }
+                            )
+                        }
+                    }
+                    .onError { error ->
+                        _state.update {
+                            it.copy(
+                                isLoading = false
+                            )
+                        }
+                        _events.send(TrackListEvent.Error(error))
+                    }
+            }
+        }
+    }
+
+    private fun getTrackById(id: Long) {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    isLoading = true
+                )
+            }
+            withContext(Dispatchers.IO) {
+                trackUseCases.getTrackByIdUseCase.invoke(id)
+                    .onSuccess { track ->
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                selectedTrack = track.toTrackUi()
                             )
                         }
                     }
