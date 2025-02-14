@@ -57,13 +57,6 @@ fun TrackList(
             },
             modifier = Modifier.size(85.dp, 85.dp)
         )
-
-//        Image(
-//
-//            painter = painterResource(id = R.drawable.stub_icon),
-//            contentDescription = track.title,
-//            modifier = Modifier.size(85.dp)
-//        )
         Column(
             modifier.weight(1f)
         ) {

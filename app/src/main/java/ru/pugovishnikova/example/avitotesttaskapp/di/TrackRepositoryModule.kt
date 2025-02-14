@@ -7,6 +7,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import ru.pugovishnikova.example.avitotesttaskapp.BuildConfig
 import ru.pugovishnikova.example.avitotesttaskapp.data.remote.TrackApiService
 import ru.pugovishnikova.example.avitotesttaskapp.data.repository.TrackRepositoryImpl
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackRepository
@@ -17,24 +18,6 @@ import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetTrackByIdUs
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackViewModel
 import java.util.concurrent.TimeUnit
 
-//import dagger.Binds
-//import dagger.Module
-//import dagger.hilt.InstallIn
-//import dagger.hilt.components.SingletonComponent
-//import jakarta.inject.Singleton
-//import ru.pugovishnikova.example.avitotesttaskapp.data.repository.TrackRepositoryImpl
-//import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackRepository
-//
-//@Module
-//@InstallIn(SingletonComponent::class)
-//abstract class TrackRepositoryModule {
-//
-//    @Binds
-//    @Singleton
-//    abstract fun bindTrackRepository(
-//        trackRepositoryImpl: TrackRepositoryImpl
-//    ): TrackRepository
-//}
 fun provideHttpClient(): OkHttpClient {
     return OkHttpClient
         .Builder()
@@ -53,7 +36,7 @@ fun provideRetrofit(
     gsonConverterFactory: GsonConverterFactory
 ): Retrofit {
     return Retrofit.Builder()
-        .baseUrl("https://api.deezer.com/")
+        .baseUrl(BuildConfig.BASE_URL)
         .client(okHttpClient)
         .addConverterFactory(gsonConverterFactory)
         .build()

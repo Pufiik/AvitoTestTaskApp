@@ -35,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -44,13 +43,18 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.coroutines.delay
 import ru.pugovishnikova.example.avitotesttaskapp.R
+import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.ReloadScreen
+import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListAction
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListState
+
 
 
 @Composable
 fun TrackDetailScreen(
     state: TrackListState,
     modifier: Modifier,
+    onAction: (TrackListAction) -> Unit,
+    onClick: () -> Unit,
     onClickButtonBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -62,7 +66,7 @@ fun TrackDetailScreen(
         ) {
             CircularProgressIndicator()
         }
-    } else if (state.selectedTrack != null) {
+    } else if (!state.isError && state.selectedTrack!=null) {
         val track = state.selectedTrack
         var isPlaying by remember { mutableStateOf(false) }
         var currentPosition by remember { mutableIntStateOf(0) }
@@ -166,6 +170,8 @@ fun TrackDetailScreen(
                 }
             }
         }
+    } else if (state.tracks.isEmpty()){
+        ReloadScreen { onAction(TrackListAction.OnBackClick(onClick)) }
     }
 }
 

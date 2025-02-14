@@ -15,6 +15,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackVi
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.util.ObserveAsEvents
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.util.toString
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.track_details.TrackDetailScreen
+import ru.pugovishnikova.example.avitotesttaskapp.util.Utils
 
 @Composable
 fun AdaptiveTrackListDetailPane(
@@ -38,27 +39,26 @@ fun AdaptiveTrackListDetailPane(
 
     NavHost(
         navController = controller,
-        startDestination = Screens.getTrackListScreen()
+        startDestination = Utils.getTrackListScreen()
     ) {
-        composable(Screens.getTrackListScreen()) {
+        composable(Utils.getTrackListScreen()) {
             TrackListScreen(
                 state = state.value,
                 onAction = { action ->
                     trackViewModel.onAction(action)
                 },
-                onClick = { controller.navigate(Screens.getTrackDetailScreen()) }
+                onClick = { controller.navigate(Utils.getTrackDetailScreen()) }
             )
         }
-        composable(Screens.getTrackDetailScreen()){
+        composable(Utils.getTrackDetailScreen()) {
             TrackDetailScreen(
                 state = state.value,
+                onAction = { action ->
+                    trackViewModel.onAction(action)
+                },
+                onClick = { controller.navigate(Utils.getTrackListScreen()) },
                 modifier = modifier
-            ) {}
+            ) { controller.navigate(Utils.getTrackListScreen()) }
         }
     }
-}
-
-object Screens {
-    fun getTrackListScreen() = "TrackListScreen"
-    fun getTrackDetailScreen() = "TrackDetailScreen"
 }

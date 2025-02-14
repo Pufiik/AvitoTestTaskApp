@@ -23,12 +23,14 @@ class TrackRepositoryImpl(
     override suspend fun getAllTracks(): Result<List<Track>, NetworkError> {
         try {
             val response = trackService.getAllTracks()
-            return responseToResult<TracksDTOResponse>(response).map { res ->
+            return responseToResult<TracksDTOResponse>(response = response).map { res ->
                 res.tracks.data.map { it.toTrack() }
             }
         } catch (e: Exception) {
             val response = null
-            return responseToResult<TracksDTOResponse>(response).map { res ->
+            return responseToResult<TracksDTOResponse>(
+                response = response,
+                isException = true).map { res ->
                 res.tracks.data.map { it.toTrack() }
             }
         }
@@ -37,13 +39,15 @@ class TrackRepositoryImpl(
     override suspend fun searchTracks(query: String): Result<List<SearchTrack>, NetworkError> {
         try {
             val response = trackService.searchTracks(query)
-            return responseToResult<SearchTracksDTOResponse>(response).map { res ->
-                res.data.map { it.toSearchTrack() }
+            return responseToResult<SearchTracksDTOResponse>(response = response)
+                .map { res -> res.data.map { it.toSearchTrack() }
             }
         } catch (e: Exception) {
             val response = null
-            return responseToResult<SearchTracksDTOResponse>(response).map { res ->
-                res.data.map { it.toSearchTrack() }
+            return responseToResult<SearchTracksDTOResponse>(
+                response = response,
+                isException = true)
+                .map { res -> res.data.map { it.toSearchTrack() }
             }
         }
     }
@@ -51,10 +55,10 @@ class TrackRepositoryImpl(
     override suspend fun getTrackById(id: Long): Result<TrackInfo, NetworkError> {
         try {
             val response = trackService.getTrackById(id)
-            return responseToResult<TrackResponse>(response).map { it.toTrackInfo() }
+            return responseToResult<TrackResponse>(response = response).map { it.toTrackInfo() }
         } catch (e: Exception) {
             val response = null
-            return responseToResult<TrackInfo>(response)
+            return responseToResult<TrackInfo>(response = response, isException = true)
         }
     }
 }

@@ -2,9 +2,12 @@ package ru.pugovishnikova.example.avitotesttaskapp.domain.util
 
 import retrofit2.Response
 import ru.pugovishnikova.example.avitotesttaskapp.util.Result
-inline fun <reified T> responseToResult(response: Response<T>?): Result<T, NetworkError> {
-    return when (response?.isSuccessful) {
-        true -> Result.Success(response.body()!!)
-        else -> Result.Error(NetworkError.NO_INTERNET)
-    }
+
+inline fun <reified T> responseToResult(
+    response: Response<T>?,
+    isException: Boolean = false
+): Result<T, NetworkError> {
+    if (response?.isSuccessful == true) return Result.Success(response.body()!!)
+    else if (isException) return Result.Error(NetworkError.NO_INTERNET)
+    return Result.Error(NetworkError.NO_FETCHING_DATA)
 }

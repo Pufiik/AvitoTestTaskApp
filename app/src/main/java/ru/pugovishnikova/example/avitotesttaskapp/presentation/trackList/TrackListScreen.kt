@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ru.pugovishnikova.example.avitotesttaskapp.util.Utils
 
 
 @Composable
@@ -46,7 +47,7 @@ fun TrackListScreen(
         ) {
             CircularProgressIndicator()
         }
-    } else {
+    } else if (!state.isError){
         Column(
             modifier = Modifier
                 .statusBarsPadding()
@@ -74,13 +75,29 @@ fun TrackListScreen(
             }
         }
     }
+    else {
+        ReloadScreen { onAction(TrackListAction.OnReloadButtonClick) }
+    }
+}
+
+@Composable
+fun ReloadScreen(onReloadClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(onClick = onReloadClick) {
+            Text(text = Utils.getReloadString())
+        }
+    }
 }
 
 @Composable
 fun SearchInputField(
     onSearch: (String) -> Unit
 ) {
-    var text by remember { mutableStateOf("") }
+    var text by remember { mutableStateOf(Utils.getEmptyString()) }
 
     Row(
         modifier = Modifier
@@ -92,14 +109,16 @@ fun SearchInputField(
             value = text,
             onValueChange = { text = it },
             modifier = Modifier.weight(1f),
-            label = { Text("Введите текст") },
+            label = { Text(Utils.getInputText()) },
             leadingIcon = {
                 Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
             }
         )
         Spacer(modifier = Modifier.width(8.dp))
         Button(onClick = { onSearch(text.lowercase())}) {
-            Text("Поиск")
+            Text(Utils.getSearch())
         }
     }
 }
+
+

@@ -48,6 +48,12 @@ class TrackViewModel(
                 val query = action.query
                 searchTracksByName(query)
             }
+            is TrackListAction.OnReloadButtonClick -> {
+                getAllTracks()
+            }
+            is TrackListAction.OnBackClick -> {
+                action.navigate()
+            }
         }
     }
 
@@ -58,7 +64,8 @@ class TrackViewModel(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    isLoading = true
+                    isLoading = true,
+                    isError = false
                 )
             }
             withContext(Dispatchers.IO) {
@@ -67,6 +74,7 @@ class TrackViewModel(
                         _state.update {
                             it.copy(
                                 isLoading = false,
+                                isError = false,
                                 tracks = tracks.map { track -> track.toTrackUi() }
                             )
                         }
@@ -74,10 +82,12 @@ class TrackViewModel(
                     .onError { error ->
                         _state.update {
                             it.copy(
-                                isLoading = false
+                                isLoading = false,
+                                isError = true
                             )
                         }
                         _events.send(TrackListEvent.Error(error))
+
                     }
             }
         }
@@ -87,7 +97,8 @@ class TrackViewModel(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    isLoading = true
+                    isLoading = true,
+                    isError = false
                 )
             }
             withContext(Dispatchers.IO) {
@@ -96,6 +107,7 @@ class TrackViewModel(
                         _state.update {
                             it.copy(
                                 isLoading = false,
+                                isError = false,
                                 selectedTrack = track.toTrackUi()
                             )
                         }
@@ -103,7 +115,8 @@ class TrackViewModel(
                     .onError { error ->
                         _state.update {
                             it.copy(
-                                isLoading = false
+                                isLoading = false,
+                                isError = true
                             )
                         }
                         _events.send(TrackListEvent.Error(error))
@@ -116,27 +129,32 @@ class TrackViewModel(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    isLoading = true
+                    isLoading = true,
+                    isError = false
                 )
             }
             withContext(Dispatchers.IO) {
-                val tracksWithName = async { trackUseCases.searchTracksUseCases.invoke("track:\"$query\"") }
-                val tracksWithArtist = async { trackUseCases.searchTracksUseCases.invoke("artist:\"$query\"") }
+                val tracksWithName =
+                    async { trackUseCases.searchTracksUseCases.invoke("track:\"$query\"") }
+                val tracksWithArtist =
+                    async { trackUseCases.searchTracksUseCases.invoke("artist:\"$query\"") }
                 listOf(tracksWithName, tracksWithArtist)
                     .awaitAll()
                     .combineResults()
                     .onSuccess { tracks ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            tracks = tracks.map { track -> track.toTrackUi() }
-                        )
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                isError = false,
+                                tracks = tracks.map { track -> track.toTrackUi() }
+                            )
+                        }
                     }
-                }
                     .onError { error ->
                         _state.update {
                             it.copy(
-                                isLoading = false
+                                isLoading = false,
+                                isError = true
                             )
                         }
                         _events.send(TrackListEvent.Error(error))

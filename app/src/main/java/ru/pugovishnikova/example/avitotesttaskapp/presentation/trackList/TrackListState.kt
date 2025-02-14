@@ -6,5 +6,6 @@ import androidx.compose.runtime.Immutable
 data class TrackListState(
     val isLoading: Boolean = false,
     val tracks: List<TrackUi> = emptyList(),
-    val selectedTrack: TrackUi? = null
+    val selectedTrack: TrackUi? = null,
+    val isError: Boolean = false
 )
