@@ -30,7 +30,9 @@ class TrackRepositoryImpl(
             val response = null
             return responseToResult<TracksDTOResponse>(
                 response = response,
-                isException = true).map { res ->
+                isException = true,
+                typeException = NetworkError.NO_INTERNET
+            ).map { res ->
                 res.tracks.data.map { it.toTrack() }
             }
         }
@@ -40,14 +42,17 @@ class TrackRepositoryImpl(
         try {
             val response = trackService.searchTracks(query)
             return responseToResult<SearchTracksDTOResponse>(response = response)
-                .map { res -> res.data.map { it.toSearchTrack() }
-            }
+                .map { res ->
+                    res.data.map { it.toSearchTrack() }
+                }
         } catch (e: Exception) {
             val response = null
             return responseToResult<SearchTracksDTOResponse>(
                 response = response,
-                isException = true)
-                .map { res -> res.data.map { it.toSearchTrack() }
+                isException = true,
+                typeException = NetworkError.NO_INTERNET
+            ).map { res ->
+                res.data.map { it.toSearchTrack() }
             }
         }
     }
@@ -58,7 +63,11 @@ class TrackRepositoryImpl(
             return responseToResult<TrackResponse>(response = response).map { it.toTrackInfo() }
         } catch (e: Exception) {
             val response = null
-            return responseToResult<TrackInfo>(response = response, isException = true)
+            return responseToResult<TrackInfo>(
+                response = response,
+                isException = true,
+                typeException = NetworkError.NO_INTERNET
+            )
         }
     }
 }

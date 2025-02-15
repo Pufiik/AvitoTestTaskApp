@@ -1,6 +1,5 @@
 package ru.pugovishnikova.example.avitotesttaskapp.domain.usecases
 
-import ru.pugovishnikova.example.avitotesttaskapp.data.utils.Track
 import ru.pugovishnikova.example.avitotesttaskapp.data.utils.TrackInfo
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackRepository
 import ru.pugovishnikova.example.avitotesttaskapp.domain.util.NetworkError

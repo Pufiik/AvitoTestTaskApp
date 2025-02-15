@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.ImageView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,19 +18,11 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,19 +30,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import ru.pugovishnikova.example.avitotesttaskapp.R
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.ReloadScreen
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListAction
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListState
+import ru.pugovishnikova.example.avitotesttaskapp.util.Utils
 
 
 @Composable
@@ -60,75 +46,26 @@ fun TrackDetailScreen(
     modifier: Modifier,
     onClick: () -> Unit,
     onAction: (TrackListAction) -> Unit,
-    onClickButtonBack: () -> Unit
+    onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
 
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-                    .setUsage(C.USAGE_MEDIA)
-                    .build(),
-                true
-            )
-            playWhenReady = true
-        }
-    }
-
-    var isPlaying by remember { mutableStateOf(true) }
-    var currentPosition by remember { mutableIntStateOf(0) }
-
-    // При смене трека сбрасываем позицию
-    LaunchedEffect(state.selectedTrack) {
-        state.selectedTrack?.preview.let { url ->
-            val mediaItem = MediaItem.fromUri(url!!)
-            exoPlayer.setMediaItem(mediaItem)
-            exoPlayer.seekTo(0) // Сброс позиции
-            currentPosition = 0 // Сбрасываем слайдер
-            exoPlayer.prepare()
-            exoPlayer.playWhenReady = true // Гарантированно начинаем играть
-            isPlaying = true
-        }
-    }
-
-    LaunchedEffect(isPlaying) {
-        while ((isPlaying || exoPlayer.isPlaying) && currentPosition < state.selectedTrack?.duration!!) {
-            delay(1000)
-            currentPosition++
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { exoPlayer.release() }
-    }
-
-
-    if (state.isLoading) {
-        Box(
-            modifier = modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-    } else if (state.selectedTrack != null && !state.isError) {
+   if (state.selectedTrack != null && !state.isError) {
         val track = state.selectedTrack
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .background(Color.Black)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.Start
             ) {
-                IconButton(onClick = onClickButtonBack) {
+                IconButton(onClick = {onAction(TrackListAction.OnBackClick(onBackClick))}) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBackIosNew,
                         contentDescription = R.string.push_back.toString(),
@@ -166,19 +103,19 @@ fun TrackDetailScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             Slider(
-                value = currentPosition.toFloat(),
-                onValueChange = { newValue ->
-                    currentPosition = newValue.toInt()
-                    exoPlayer.seekTo((newValue * 1000).toLong())
+                value = state.currentPosition.toFloat(),
+                onValueChange = { newValue -> onAction(TrackListAction.OnSeekTo(newValue.toInt())) },
+                onValueChangeFinished = {
+                    if (state.currentPosition == 0) onAction(TrackListAction.OnSeekToStart)
                 },
-                valueRange = 0f..(state.selectedTrack.duration.toFloat()),
+                valueRange = 0f..(track.duration.toFloat()),
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = formatTime(currentPosition), fontSize = 14.sp, color = Color.White)
+                Text(text = formatTime(state.currentPosition), fontSize = 14.sp, color = Color.White)
                 Text(text = formatTime(track.duration), fontSize = 14.sp, color = Color.White)
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -188,38 +125,35 @@ fun TrackDetailScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 IconButton(onClick = {
-                    currentPosition = 0
                     onAction(TrackListAction.OnPrevClick)
                 }) {
                     Icon(
                         imageVector = Icons.Filled.SkipPrevious,
-                        contentDescription = "Предыдущий трек",
+                        contentDescription = Utils.getPrevTrackString(),
                         tint = Color.White
                     )
                 }
                 IconButton(onClick = {
-                    isPlaying = !isPlaying
-                    exoPlayer.playWhenReady = isPlaying
+                    onAction(TrackListAction.OnPlayPause)
                 }) {
                     Icon(
-                        imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = "Пауза/Воспроизведение",
+                        imageVector = if (state.isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                        contentDescription = Utils.getPlayPauseString(),
                         tint = Color.White
                     )
                 }
                 IconButton(onClick = {
-                    currentPosition = 0
                     onAction(TrackListAction.OnNextClick)
                 }) {
                     Icon(
                         imageVector = Icons.Filled.SkipNext,
-                        contentDescription = "Следующий трек",
+                        contentDescription = Utils.getNextTrackString(),
                         tint = Color.White
                     )
                 }
             }
         }
-    } else {
+    } else if (state.isError){
         ReloadScreen { onAction(TrackListAction.OnBackClick(onClick)) }
     }
 }

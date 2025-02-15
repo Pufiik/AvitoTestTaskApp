@@ -9,4 +9,7 @@ object Utils {
     fun getSearch() = "Поиск"
     fun getEmptyString() = ""
     fun getReloadString() = "Перезагрузить"
+    fun getPlayPauseString() = "Пауза/Воспроизведение"
+    fun getNextTrackString() = "Следующий трек"
+    fun getPrevTrackString() = "Предыдущий трек"
 }

@@ -72,7 +72,7 @@ fun ContributorDTO.toContributor(): Contributor {
         pictureBig = this.pictureBig,
         pictureXl = this.pictureXl,
         radio = this.radio,
-        tracklist = this.tracklist,
+        tracklist = this.trackList,
         type = this.type,
         role = this.role
     )

@@ -41,7 +41,7 @@ data class ContributorDTO(
     @SerializedName("picture_big") val pictureBig: String?,
     @SerializedName("picture_xl") val pictureXl: String?,
     @SerializedName("radio") val radio: Boolean?,
-    @SerializedName("tracklist") val tracklist: String?,
+    @SerializedName("tracklist") val trackList: String?,
     @SerializedName("type") val type: String?,
     @SerializedName("role") val role: String?
 )

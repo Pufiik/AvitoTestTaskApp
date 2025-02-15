@@ -1,5 +1,9 @@
 package ru.pugovishnikova.example.avitotesttaskapp.di
 
+import android.content.Context
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.exoplayer.ExoPlayer
 import okhttp3.OkHttpClient
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -18,7 +22,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetTrackByIdUs
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackViewModel
 import java.util.concurrent.TimeUnit
 
-fun provideHttpClient(): OkHttpClient {
+private fun provideHttpClient(): OkHttpClient {
     return OkHttpClient
         .Builder()
         .readTimeout(60, TimeUnit.SECONDS)
@@ -26,12 +30,24 @@ fun provideHttpClient(): OkHttpClient {
         .build()
 }
 
+fun provideExoPlayer(context: Context): ExoPlayer {
+    return ExoPlayer.Builder(context).build().apply {
+        setAudioAttributes(
+            AudioAttributes.Builder()
+                .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                .setUsage(C.USAGE_MEDIA)
+                .build(),
+            true
+        )
+        playWhenReady = true
+    }
+}
 
-fun provideConverterFactory(): GsonConverterFactory =
+private fun provideConverterFactory(): GsonConverterFactory =
     GsonConverterFactory.create()
 
 
-fun provideRetrofit(
+private fun provideRetrofit(
     okHttpClient: OkHttpClient,
     gsonConverterFactory: GsonConverterFactory
 ): Retrofit {
@@ -42,7 +58,7 @@ fun provideRetrofit(
         .build()
 }
 
-fun provideService(retrofit: Retrofit): TrackApiService =
+private fun provideService(retrofit: Retrofit): TrackApiService =
     retrofit.create(TrackApiService::class.java)
 
 
@@ -51,6 +67,10 @@ val networkModule = module {
     singleOf(::provideConverterFactory)
     singleOf(::provideRetrofit)
     singleOf(::provideService)
+}
+
+val exoPlayerModule = module {
+    singleOf(::provideExoPlayer)
 }
 
 val repositoryModule = module {

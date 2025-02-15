@@ -7,4 +7,8 @@ sealed interface TrackListAction {
     data class OnBackClick(val navigate: () -> Unit) : TrackListAction
     data object OnPrevClick : TrackListAction
     data object OnNextClick : TrackListAction
+    data object OnPlayPause : TrackListAction
+    data class OnSeekTo(val position: Int): TrackListAction
+    data object OnSeekToStart: TrackListAction
+    data class OnTrackLoaded(val duration: Int) : TrackListAction
 }

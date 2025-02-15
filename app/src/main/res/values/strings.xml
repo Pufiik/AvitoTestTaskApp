@@ -4,4 +4,5 @@
     <string name="no_internet">Отсутствие подключения к интернету</string>
     <string name="no_fetching_data">Ничего не нашлось по Вашему запросу</string>
     <string name="push_back">Вернуться назад</string>
+    <string name="too_long_request">Время ожидания запроса истекло</string>
 </resources>
