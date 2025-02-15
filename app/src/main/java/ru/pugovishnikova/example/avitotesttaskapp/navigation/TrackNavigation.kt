@@ -8,7 +8,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.permissions.rememberPermissionState
 import org.koin.androidx.compose.koinViewModel
+import android.Manifest
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListEvent
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListScreen
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackViewModel
@@ -16,6 +19,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.util.Ob
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.util.toString
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.track_details.TrackDetailScreen
 import ru.pugovishnikova.example.avitotesttaskapp.util.Utils
+
 
 @Composable
 fun AdaptiveTrackListDetailPane(
@@ -25,6 +29,8 @@ fun AdaptiveTrackListDetailPane(
     val state = trackViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val controller = rememberNavController()
+
+
     ObserveAsEvents(events = trackViewModel.events) { event ->
         when (event) {
             is TrackListEvent.Error -> {
@@ -56,7 +62,9 @@ fun AdaptiveTrackListDetailPane(
                 onAction = { action ->
                     trackViewModel.onAction(action)
                 },
-                onClick = { controller.navigate(Utils.getTrackListScreen()) },
+                onClick = {
+                    controller.navigate(Utils.getTrackListScreen())
+                },
                 modifier = modifier
             ) { controller.navigate(Utils.getTrackListScreen()) }
         }

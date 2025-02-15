@@ -1,10 +1,19 @@
 package ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList
 
+import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackService.TrackService
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.annotation.OptIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.common.util.Util.startForegroundService
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.SessionCommand
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -22,6 +31,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackUseCases
 import ru.pugovishnikova.example.avitotesttaskapp.domain.util.NetworkError
+import ru.pugovishnikova.example.avitotesttaskapp.util.Utils
 import ru.pugovishnikova.example.avitotesttaskapp.util.combineResults
 import ru.pugovishnikova.example.avitotesttaskapp.util.onError
 import ru.pugovishnikova.example.avitotesttaskapp.util.onSuccess
@@ -30,6 +40,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.util.onSuccess
 class TrackViewModel(
     private val trackUseCases: TrackUseCases,
     private val exoPlayer: ExoPlayer,
+    private val appContext: Context
 ) : ViewModel() {
     private var currentTrackIndex: Int = 0
     private var trackJob: Job? = null
@@ -72,6 +83,7 @@ class TrackViewModel(
     fun onAction(action: TrackListAction) {
         when (action) {
             is TrackListAction.OnTrackClick -> {
+                startService()
                 if (state.value.selectedTrack != null && state.value.selectedTrack!!.id == action.track.id) action.navigate()
                 else {
                     getTrackById(action.track.id, action.navigate)
@@ -186,6 +198,16 @@ class TrackViewModel(
                                     selectedTrack = selectedTrack
                                 )
                             }
+                            MediaItem.Builder()
+                                .setUri(track.preview)
+                                .setMediaMetadata(
+                                    MediaMetadata.Builder()
+                                        .setAlbumArtist(track.artist?.name ?: Utils.getAuthorName())
+                                        .setDisplayTitle(track.title)
+                                        .setSubtitle(track.titleShort ?: Utils.getEmptyString())
+                                        .build()
+                                ).build()
+
                             withContext(Dispatchers.Main) {
                                 playTrack(selectedTrack?.preview!!)
                                 if (navigate != null) navigate()
@@ -300,17 +322,49 @@ class TrackViewModel(
                 currentPosition = 0
             )
         }
+//        startForegroundService(state.value.selectedTrack!!)
     }
+
+//    private fun startForegroundService(track: TrackUi) {
+//        val intent = Intent(appContext, TrackService::class.java).apply {
+//            putExtra("track_url", track.preview)
+//            putExtra("track_title", track.title)
+//        }
+//        appContext.startService(intent)
+//    }
+
+    private fun stopForegroundService() {
+        val intent = Intent(appContext, TrackService::class.java)
+        appContext.stopService(intent)
+    }
+
 
     private fun togglePlayPause() {
         val isPlaying = !_state.value.isPlaying
         exoPlayer.playWhenReady = isPlaying
+//        sendCommand(if (isPlaying) TrackService.ACTION_PLAY else TrackService.ACTION_PAUSE)
         _state.update { it.copy(isPlaying = isPlaying) }
     }
+
+    @OptIn(UnstableApi::class)
+    private fun startService() {
+        if (!state.value.isServicePlaying) {
+            val intent = Intent(appContext, TrackService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                appContext.startForegroundService(intent) // API 26+
+            } else {
+                appContext.startService(intent) // Для старых версий
+            }
+            _state.update { it.copy(isServicePlaying = true) }
+        }
+    }
+
 
 
     override fun onCleared() {
         super.onCleared()
+        stopForegroundService()
         exoPlayer.release()
     }
+
 }

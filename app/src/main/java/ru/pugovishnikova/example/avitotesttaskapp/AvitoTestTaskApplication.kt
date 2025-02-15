@@ -7,6 +7,7 @@ import org.koin.core.context.startKoin
 import ru.pugovishnikova.example.avitotesttaskapp.di.exoPlayerModule
 import ru.pugovishnikova.example.avitotesttaskapp.di.networkModule
 import ru.pugovishnikova.example.avitotesttaskapp.di.repositoryModule
+import ru.pugovishnikova.example.avitotesttaskapp.di.serviceModule
 import ru.pugovishnikova.example.avitotesttaskapp.di.useCasesModule
 import ru.pugovishnikova.example.avitotesttaskapp.di.viewModelModule
 
@@ -17,8 +18,7 @@ class AvitoTestTaskApplication: Application() {
         startKoin {
             androidContext(this@AvitoTestTaskApplication)
             androidLogger()
-
-            modules(networkModule, repositoryModule, viewModelModule, useCasesModule, exoPlayerModule)
+            modules(networkModule, repositoryModule, viewModelModule, useCasesModule, exoPlayerModule, serviceModule)
         }
 
     }

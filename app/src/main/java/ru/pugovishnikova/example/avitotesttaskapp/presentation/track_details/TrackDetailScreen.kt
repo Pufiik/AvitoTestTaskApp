@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -95,11 +96,11 @@ fun TrackDetailScreen(
                 modifier = Modifier.size(85.dp, 85.dp)
             )
             Spacer(modifier = Modifier.height(20.dp))
-            Text(text = track.title, fontSize = 22.sp, color = Color.White)
+            Text(text = track.title, fontSize = 22.sp, color = Color.White, textAlign = TextAlign.Center)
             track.albumTitle?.let {
-                Text(text = it, fontSize = 16.sp, color = Color.Gray)
+                Text(text = it, fontSize = 16.sp, color = Color.Gray, textAlign = TextAlign.Center)
             }
-            Text(text = track.artistName, fontSize = 18.sp, color = Color.White)
+            Text(text = track.artistName, fontSize = 18.sp, color = Color.White, textAlign = TextAlign.Center)
             Spacer(modifier = Modifier.height(30.dp))
 
             Slider(

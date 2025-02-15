@@ -10,5 +10,6 @@ data class TrackListState(
     val selectedTrack: TrackUi? = null,
     val isError: Boolean = false,
     val currentPosition: Int = 0,
+    var isServicePlaying: Boolean = false,
     val duration: Int = 0
 )

@@ -1,9 +1,11 @@
 package ru.pugovishnikova.example.avitotesttaskapp.di
 
+import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackService.TrackService
 import android.content.Context
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaSession
 import okhttp3.OkHttpClient
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -19,6 +21,8 @@ import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetAllTracksUs
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackUseCases
 import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.SearchTracksUseCase
 import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetTrackByIdUseCase
+import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackService.TrackNotificationManager
+import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackService.TrackNotificationAdapter
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackViewModel
 import java.util.concurrent.TimeUnit
 
@@ -29,6 +33,11 @@ private fun provideHttpClient(): OkHttpClient {
         .connectTimeout(60, TimeUnit.SECONDS)
         .build()
 }
+
+fun provideTrackService(context: Context): TrackService {
+    return TrackService()
+}
+
 
 fun provideExoPlayer(context: Context): ExoPlayer {
     return ExoPlayer.Builder(context).build().apply {
@@ -62,12 +71,24 @@ private fun provideService(retrofit: Retrofit): TrackApiService =
     retrofit.create(TrackApiService::class.java)
 
 
+
 val networkModule = module {
     singleOf(::provideHttpClient)
     singleOf(::provideConverterFactory)
     singleOf(::provideRetrofit)
     singleOf(::provideService)
 }
+
+fun provideMediaSession(context: Context, player: ExoPlayer): MediaSession {
+    return MediaSession.Builder(context, player).build()
+}
+
+val serviceModule = module {
+    single { provideMediaSession(get(), get()) } // Создаем и предоставляем MediaSession
+    single { TrackNotificationManager(get(), get()) }
+    single { TrackService() } // Сервис
+}
+
 
 val exoPlayerModule = module {
     singleOf(::provideExoPlayer)
@@ -80,6 +101,7 @@ val repositoryModule = module {
 val viewModelModule = module {
     viewModelOf(::TrackViewModel)
 }
+
 
 val useCasesModule = module {
     singleOf(::GetAllTracksUseCase)
