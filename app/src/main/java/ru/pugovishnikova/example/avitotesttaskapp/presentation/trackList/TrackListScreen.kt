@@ -49,33 +49,7 @@ fun TrackListScreen(
             CircularProgressIndicator()
         }
     } else if (!state.isError) {
-        Column(
-            modifier = Modifier
-                .statusBarsPadding()
-                .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            SearchInputField { query ->
-                onAction(TrackListAction.OnSearchButtonClick(query))
-            }
-
-            LazyColumn(
-                modifier = modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(state.tracks) { trackUi ->
-                    TrackList(
-                        track = trackUi,
-                        onClick = { onAction(TrackListAction.OnTrackClick(trackUi, onClick)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    HorizontalDivider()
-
-                }
-            }
-        }
+        TrackLazyList(state.tracks, onAction, onClick, modifier)
     } else {
         ReloadScreen { onAction(TrackListAction.OnReloadButtonClick) }
     }
@@ -102,30 +76,38 @@ fun DownloadScreen(
             CircularProgressIndicator()
         }
     } else if (!state.isError) {
-        Column(
-            modifier = Modifier
-                .statusBarsPadding()
-                .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            SearchInputField { query ->
-                onAction(TrackListAction.OnSearchButtonClick(query))
-            }
-            LazyColumn(
-                modifier = modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(state.downloadTracks) { trackUi ->
-                    TrackList(
-                        track = trackUi,
-                        onClick = { onAction(TrackListAction.OnTrackClick(trackUi, onClick)) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    HorizontalDivider()
+        TrackLazyList(state.downloadTracks, onAction, onClick, modifier)
+    }
+}
 
-                }
+@Composable
+fun TrackLazyList(items: List<TrackUi>,
+                  onAction: (TrackListAction) -> Unit,
+                  onClick: () -> Unit,
+                  modifier: Modifier = Modifier,) {
+    Column(
+        modifier = Modifier
+            .statusBarsPadding()
+            .fillMaxSize()
+            .padding(horizontal = 10.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        SearchInputField { query ->
+            onAction(TrackListAction.OnSearchButtonClick(query))
+        }
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(items) { trackUi ->
+                TrackList(
+                    track = trackUi,
+                    onClick = { onAction(TrackListAction.OnTrackClick(trackUi, onClick)) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                HorizontalDivider()
+
             }
         }
     }

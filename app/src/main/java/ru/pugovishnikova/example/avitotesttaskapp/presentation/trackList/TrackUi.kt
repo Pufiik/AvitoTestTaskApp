@@ -19,26 +19,6 @@ data class TrackUi (
     val pos: Int = -1
 )
 
-//fun TrackUi.toEntity(): DownloadedTrackEntity = DownloadedTrackEntity (
-//    id = id,
-//    title = title,
-//    artist = authorName,
-//    album = albumTitle,
-//    duration = duration,
-//    filePath = preview
-//)
-//
-//fun DownloadedTrackEntity.toTrackUi(): TrackUi = TrackUi (
-//    id = id,
-//    title = title,
-//    authorName = artist?:Utils.getAuthorName(),
-//    imageId = album,
-//    duration = duration,
-//    albumTitle = album,
-//    artistName = artist?:Utils.getAuthorName(),
-//    preview = filePath
-//)
-
 fun Track.toTrackUi(): TrackUi = TrackUi(
     id = id,
     title = title,

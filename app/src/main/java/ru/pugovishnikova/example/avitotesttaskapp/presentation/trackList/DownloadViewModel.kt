@@ -13,11 +13,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackUseCases
+import ru.pugovishnikova.example.avitotesttaskapp.util.Utils
 
 class DownloadViewModel(
-    private val trackUseCases: TrackUseCases,
-    private val sharedPlayerViewModel: SharedPlayerViewModel,
     private val appContext: Context
 ) : ViewModel() {
     private val _state = MutableStateFlow(TrackListState())
@@ -32,12 +30,11 @@ class DownloadViewModel(
 
     fun onAction(action: TrackListAction) {
         when (action) {
-            is TrackListAction.OnTrackClick -> {
-                sharedPlayerViewModel.setTrack(action.track)
-                action.navigate()
-            }
+            is TrackListAction.OnTrackClick -> {}
 
-            is TrackListAction.OnSearchButtonClick -> {}
+            is TrackListAction.OnSearchButtonClick -> {
+                searchTrack(appContext, action.query)
+            }
 
             is TrackListAction.OnReloadButtonClick -> {}
 
@@ -56,6 +53,7 @@ class DownloadViewModel(
             is TrackListAction.OnTrackLoaded -> {}
 
             is TrackListAction.OnDownloadClick -> {}
+
             is TrackListAction.OnDownloadScreenClick -> {
                 getDownloadedTracks(appContext)
             }
@@ -74,12 +72,28 @@ class DownloadViewModel(
         }
     }
 
+    private fun searchTrack(context: Context, input: String) {
+        viewModelScope.launch {
+            val tracks = getTracks(context)
+            val newTracks = tracks.filter { it.title.lowercase().contains(input.lowercase()) || it.authorName.lowercase().contains(input.lowercase()) }
+            val a = newTracks
+            _state.update {
+                it.copy(
+                    isLoading = false,
+                    isError = false,
+                    downloadTracks = tracks
+                )
+            }
+        }
+    }
+
     private suspend fun getTracks(context: Context): List<TrackUi> =
         withContext(Dispatchers.IO) {
             val sharedPreferences =
-                context.getSharedPreferences("tracks_prefs", Context.MODE_PRIVATE)
-            val json = sharedPreferences.getString("tracks_list", "[]")
+                context.getSharedPreferences(Utils.getTracksPrefsString(), Context.MODE_PRIVATE)
+            val json =
+                sharedPreferences.getString(Utils.getTracksListString(), Utils.getSquareString())
             val type = object : TypeToken<List<TrackUi>>() {}.type
             Gson().fromJson(json, type)
-    }
+        }
 }

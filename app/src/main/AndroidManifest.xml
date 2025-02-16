@@ -36,7 +36,6 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-        <receiver android:name=".presentation.trackService.TrackReceiver" android:exported="false" />
 
     </application>
 

@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("kotlin-kapt")
+//    id("kotlin-kapt")
     id("org.jetbrains.kotlin.plugin.serialization")
     alias(libs.plugins.compose.compiler)
 //    id("dagger.hilt.android.plugin")
@@ -105,7 +105,7 @@ dependencies {
     //Room
 //    implementation(libs.androidx.room.runtime)
 //    annotationProcessor(libs.androidx.room.compiler)
-    kapt("androidx.room:room-compiler:$roomVersion")
+//    kapt("androidx.room:room-compiler:$roomVersion")
     implementation(libs.androidx.room.ktx)
     //Serialization
 

@@ -1,8 +1,6 @@
 package ru.pugovishnikova.example.avitotesttaskapp.presentation.track_details
-
 import android.content.Context
 import android.widget.ImageView
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Pause
@@ -169,15 +166,14 @@ fun TrackDetailScreen(
                         tint = Color.White
                     )
                 }
-                Button(onClick = {onAction(TrackListAction.OnDownloadClick)}) {
-                    Text("Скачать трек")
-                }
+
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Button(onClick = { onAction(TrackListAction.OnDownloadClick) }) {
+                Text(Utils.getDownloadTrackString())
             }
         }
 
-
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(text = "Скачанные треки", fontSize = 18.sp )
 
     } else if (state.isError) {
         ReloadScreen { onAction(TrackListAction.OnBackClick(onClick)) }

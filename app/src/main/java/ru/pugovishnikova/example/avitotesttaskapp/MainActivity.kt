@@ -28,17 +28,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
-import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import ru.pugovishnikova.example.avitotesttaskapp.navigation.BottomNavigationItem
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.DownloadScreen
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.DownloadViewModel
-import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.SharedPlayerViewModel
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListEvent
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListScreen
-import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackListState
-import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackUi
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackViewModel
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.util.ObserveAsEvents
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.util.toString
@@ -48,19 +43,18 @@ import ru.pugovishnikova.example.avitotesttaskapp.util.Utils
 
 
 class MainActivity : ComponentActivity() {
-    private var isServicesRunning = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val items = listOf(
             BottomNavigationItem(
-                title = "DownloadScreen",
+                title = Utils.getDownloadScreen(),
                 selectedIcon = Icons.Filled.Downloading,
                 unSelectedIcon = Icons.Outlined.Downloading
             ),
             BottomNavigationItem(
-                title = "TrackListScreen",
+                title = Utils.getTrackListScreen(),
                 selectedIcon = Icons.Filled.MusicNote,
                 unSelectedIcon = Icons.Outlined.MusicNote
             )
@@ -100,7 +94,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                 ) { innerPadding ->
                     val trackViewModel = koinViewModel<TrackViewModel>()
-                    val sharedPlayerViewModel = koinViewModel<SharedPlayerViewModel>()
                     val state = trackViewModel.state.collectAsStateWithLifecycle()
                     val context = LocalContext.current
 
@@ -155,6 +148,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-@Serializable
-data class TrackDetailsScreen(val track: TrackUi)

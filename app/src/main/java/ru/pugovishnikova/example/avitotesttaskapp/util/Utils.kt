@@ -13,4 +13,8 @@ object Utils {
     fun getPlayPauseString() = "Пауза/Воспроизведение"
     fun getNextTrackString() = "Следующий трек"
     fun getPrevTrackString() = "Предыдущий трек"
+    fun getTracksPrefsString() = "tracks_prefs"
+    fun getTracksListString() = "tracks_list"
+    fun getSquareString() = "[]"
+    fun getDownloadTrackString() = "Скачать трек"
 }

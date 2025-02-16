@@ -4,7 +4,6 @@ import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackService.Trac
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.annotation.OptIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +22,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -41,7 +39,6 @@ import ru.pugovishnikova.example.avitotesttaskapp.util.onSuccess
 
 class TrackViewModel(
     private val trackUseCases: TrackUseCases,
-    private val sharedPlayerViewModel: SharedPlayerViewModel,
     private val exoPlayer: ExoPlayer,
     private val appContext: Context
 ) : ViewModel() {
@@ -52,7 +49,6 @@ class TrackViewModel(
         .onStart {
             getAllTracks()
             observePlayer()
-            observeSharedTrack()
         }
         .stateIn(
             viewModelScope,
@@ -60,17 +56,7 @@ class TrackViewModel(
             TrackListState()
         )
 
-    private fun observeSharedTrack() {
-        viewModelScope.launch {
-            sharedPlayerViewModel.selectedTrack.collectLatest { track ->
-                Log.d("TrackViewModel", "Received new track: ${track?.id}")
-                if (track != null) {
-                    _state.update { it.copy(selectedTrack = track) }
-                    playTrack(track.preview)
-                }
-            }
-        }
-    }
+
 
     private fun observePlayer() {
         exoPlayer.addListener(object : Player.Listener {
@@ -149,13 +135,9 @@ class TrackViewModel(
             }
 
             is TrackListAction.OnDownloadClick -> {
-                val oldList = getTracks(appContext)
-                val newTracks = oldList.toMutableList().apply { add(state.value.selectedTrack!!) }
-                saveTracks(appContext, newTracks)
+                updateDownloadTracks()
             }
-            is TrackListAction.OnDownloadScreenClick -> {
-//                getDownloadedTracks(appContext)
-            }
+            is TrackListAction.OnDownloadScreenClick -> {}
         }
     }
 
@@ -249,6 +231,11 @@ class TrackViewModel(
                 }
             }
         }
+    }
+    private fun updateDownloadTracks() {
+        val oldList = getTracks(appContext)
+        val newTracks = if (oldList.contains(state.value.selectedTrack!!)) oldList else oldList.toMutableList().apply { add(state.value.selectedTrack!!) }
+        saveTracks(appContext, newTracks)
     }
 
     private fun searchTracksByName(query: String) {
@@ -366,25 +353,25 @@ class TrackViewModel(
         if (!state.value.isServicePlaying) {
             val intent = Intent(appContext, TrackService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                appContext.startForegroundService(intent) // API 26+
+                appContext.startForegroundService(intent)
             } else {
-                appContext.startService(intent) // Для старых версий
+                appContext.startService(intent)
             }
             _state.update { it.copy(isServicePlaying = true) }
         }
     }
 
     private fun saveTracks(context: Context, tracks: List<TrackUi>) {
-        val sharedPreferences = context.getSharedPreferences("tracks_prefs", Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(Utils.getTracksPrefsString(), Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         val json = Gson().toJson(tracks)
-        editor.putString("tracks_list", json)
+        editor.putString(Utils.getTracksListString(), json)
         editor.apply()
     }
 
     private fun getTracks(context: Context): List<TrackUi> {
-        val sharedPreferences = context.getSharedPreferences("tracks_prefs", Context.MODE_PRIVATE)
-        val json = sharedPreferences.getString("tracks_list", "[]")
+        val sharedPreferences = context.getSharedPreferences(Utils.getTracksPrefsString(), Context.MODE_PRIVATE)
+        val json = sharedPreferences.getString(Utils.getTracksListString(), Utils.getSquareString())
         val type = object : TypeToken<List<TrackUi>>() {}.type
         return Gson().fromJson(json, type)
     }
