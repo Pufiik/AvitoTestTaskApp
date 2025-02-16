@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +48,7 @@ fun TrackListScreen(
         ) {
             CircularProgressIndicator()
         }
-    } else if (!state.isError){
+    } else if (!state.isError) {
         Column(
             modifier = Modifier
                 .statusBarsPadding()
@@ -57,7 +58,8 @@ fun TrackListScreen(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             SearchInputField { query ->
-                onAction(TrackListAction.OnSearchButtonClick(query)) }
+                onAction(TrackListAction.OnSearchButtonClick(query))
+            }
 
             LazyColumn(
                 modifier = modifier.fillMaxSize(),
@@ -74,11 +76,61 @@ fun TrackListScreen(
                 }
             }
         }
-    }
-    else {
+    } else {
         ReloadScreen { onAction(TrackListAction.OnReloadButtonClick) }
     }
 }
+
+
+@Composable
+fun DownloadScreen(
+    state: TrackListState,
+    onAction: (TrackListAction) -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LaunchedEffect(Unit) {
+        onAction(TrackListAction.OnDownloadScreenClick)
+    }
+
+    if (state.isLoading) {
+        Box(
+            modifier = modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+    } else if (!state.isError) {
+        Column(
+            modifier = Modifier
+                .statusBarsPadding()
+                .fillMaxSize()
+                .padding(horizontal = 10.dp, vertical = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            SearchInputField { query ->
+                onAction(TrackListAction.OnSearchButtonClick(query))
+            }
+            LazyColumn(
+                modifier = modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(state.downloadTracks) { trackUi ->
+                    TrackList(
+                        track = trackUi,
+                        onClick = { onAction(TrackListAction.OnTrackClick(trackUi, onClick)) },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    HorizontalDivider()
+
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun ReloadScreen(onReloadClick: () -> Unit) {
@@ -99,6 +151,7 @@ fun SearchInputField(
 ) {
     var text by remember { mutableStateOf(Utils.getEmptyString()) }
 
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,7 +168,7 @@ fun SearchInputField(
             }
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Button(onClick = { onSearch(text.lowercase())}) {
+        Button(onClick = { onSearch(text.lowercase()) }) {
             Text(Utils.getSearch())
         }
     }

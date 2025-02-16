@@ -4,6 +4,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackService.Trac
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,9 +12,9 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.common.util.Util.startForegroundService
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.SessionCommand
+import com.google.common.reflect.TypeToken
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -22,6 +23,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -39,6 +41,7 @@ import ru.pugovishnikova.example.avitotesttaskapp.util.onSuccess
 
 class TrackViewModel(
     private val trackUseCases: TrackUseCases,
+    private val sharedPlayerViewModel: SharedPlayerViewModel,
     private val exoPlayer: ExoPlayer,
     private val appContext: Context
 ) : ViewModel() {
@@ -46,15 +49,27 @@ class TrackViewModel(
     private var trackJob: Job? = null
     private val _state = MutableStateFlow(TrackListState())
     val state = _state
-        .onStart { getAllTracks() }
+        .onStart {
+            getAllTracks()
+            observePlayer()
+            observeSharedTrack()
+        }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),
             TrackListState()
         )
 
-    init {
-        observePlayer()
+    private fun observeSharedTrack() {
+        viewModelScope.launch {
+            sharedPlayerViewModel.selectedTrack.collectLatest { track ->
+                Log.d("TrackViewModel", "Received new track: ${track?.id}")
+                if (track != null) {
+                    _state.update { it.copy(selectedTrack = track) }
+                    playTrack(track.preview)
+                }
+            }
+        }
     }
 
     private fun observePlayer() {
@@ -132,6 +147,15 @@ class TrackViewModel(
             is TrackListAction.OnTrackLoaded -> {
                 _state.update { it.copy(duration = action.duration) }
             }
+
+            is TrackListAction.OnDownloadClick -> {
+                val oldList = getTracks(appContext)
+                val newTracks = oldList.toMutableList().apply { add(state.value.selectedTrack!!) }
+                saveTracks(appContext, newTracks)
+            }
+            is TrackListAction.OnDownloadScreenClick -> {
+//                getDownloadedTracks(appContext)
+            }
         }
     }
 
@@ -184,7 +208,7 @@ class TrackViewModel(
             }
             withTimeout(5000L) {
                 withContext(Dispatchers.IO) {
-                    trackUseCases.getTrackByIdUseCase.invoke(id)
+                    trackUseCases.getTrackByIdUseCase(id)
                         .onSuccess { track ->
                             val trackU = track.toTrackUi()
                             val flag = (trackU.imageId == null)
@@ -322,16 +346,8 @@ class TrackViewModel(
                 currentPosition = 0
             )
         }
-//        startForegroundService(state.value.selectedTrack!!)
     }
 
-//    private fun startForegroundService(track: TrackUi) {
-//        val intent = Intent(appContext, TrackService::class.java).apply {
-//            putExtra("track_url", track.preview)
-//            putExtra("track_title", track.title)
-//        }
-//        appContext.startService(intent)
-//    }
 
     private fun stopForegroundService() {
         val intent = Intent(appContext, TrackService::class.java)
@@ -342,7 +358,6 @@ class TrackViewModel(
     private fun togglePlayPause() {
         val isPlaying = !_state.value.isPlaying
         exoPlayer.playWhenReady = isPlaying
-//        sendCommand(if (isPlaying) TrackService.ACTION_PLAY else TrackService.ACTION_PAUSE)
         _state.update { it.copy(isPlaying = isPlaying) }
     }
 
@@ -359,6 +374,20 @@ class TrackViewModel(
         }
     }
 
+    private fun saveTracks(context: Context, tracks: List<TrackUi>) {
+        val sharedPreferences = context.getSharedPreferences("tracks_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val json = Gson().toJson(tracks)
+        editor.putString("tracks_list", json)
+        editor.apply()
+    }
+
+    private fun getTracks(context: Context): List<TrackUi> {
+        val sharedPreferences = context.getSharedPreferences("tracks_prefs", Context.MODE_PRIVATE)
+        val json = sharedPreferences.getString("tracks_list", "[]")
+        val type = object : TypeToken<List<TrackUi>>() {}.type
+        return Gson().fromJson(json, type)
+    }
 
 
     override fun onCleared() {
@@ -366,5 +395,4 @@ class TrackViewModel(
         stopForegroundService()
         exoPlayer.release()
     }
-
 }

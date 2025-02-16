@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-//    id("kotlin-kapt")
+    id("kotlin-kapt")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.compose.compiler)
 //    id("dagger.hilt.android.plugin")
 }
 
@@ -64,7 +66,7 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
 
-
+    val roomVersion = "2.6.1"
 //    //Dagger-Hilt
 //    implementation(libs.hilt.android)
 //    implementation(libs.androidx.storage)
@@ -100,7 +102,13 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
 
+    //Room
+//    implementation(libs.androidx.room.runtime)
+//    annotationProcessor(libs.androidx.room.compiler)
+    kapt("androidx.room:room-compiler:$roomVersion")
+    implementation(libs.androidx.room.ktx)
     //Serialization
+
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.core.ktx)

@@ -11,4 +11,6 @@ sealed interface TrackListAction {
     data class OnSeekTo(val position: Int): TrackListAction
     data object OnSeekToStart: TrackListAction
     data class OnTrackLoaded(val duration: Int) : TrackListAction
+    data object OnDownloadClick: TrackListAction
+    data object OnDownloadScreenClick: TrackListAction
 }

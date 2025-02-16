@@ -7,6 +7,7 @@ data class TracksDTOResponse(
     val tracks: DataDTOResponse
 )
 
+@Serializable
 data class DataDTOResponse(
     @SerializedName("data")
     val data: List<TrackDto>,
@@ -15,6 +16,7 @@ data class DataDTOResponse(
     val total: Int
 )
 
+@Serializable
 data class TrackDto(
     val id: Long,
     val title: String,
@@ -34,6 +36,7 @@ data class TrackDto(
     val type: String?
 )
 
+@Serializable
 data class ArtistDto(
     val id: Long,
     val name: String?,
@@ -48,6 +51,7 @@ data class ArtistDto(
     val type: String?
 )
 
+@Serializable
 data class AlbumDto(
     val id: Long,
     val title: String?,

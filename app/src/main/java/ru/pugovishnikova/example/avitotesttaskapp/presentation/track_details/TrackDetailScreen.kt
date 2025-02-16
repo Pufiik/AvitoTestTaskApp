@@ -2,6 +2,7 @@ package ru.pugovishnikova.example.avitotesttaskapp.presentation.track_details
 
 import android.content.Context
 import android.widget.ImageView
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Slider
@@ -51,7 +54,7 @@ fun TrackDetailScreen(
 ) {
     val context = LocalContext.current
 
-   if (state.selectedTrack != null && !state.isError) {
+    if (state.selectedTrack != null && !state.isError) {
         val track = state.selectedTrack
         Column(
             modifier = modifier
@@ -66,7 +69,7 @@ fun TrackDetailScreen(
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.Start
             ) {
-                IconButton(onClick = {onAction(TrackListAction.OnBackClick(onBackClick))}) {
+                IconButton(onClick = { onAction(TrackListAction.OnBackClick(onBackClick)) }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBackIosNew,
                         contentDescription = R.string.push_back.toString(),
@@ -96,11 +99,21 @@ fun TrackDetailScreen(
                 modifier = Modifier.size(85.dp, 85.dp)
             )
             Spacer(modifier = Modifier.height(20.dp))
-            Text(text = track.title, fontSize = 22.sp, color = Color.White, textAlign = TextAlign.Center)
+            Text(
+                text = track.title,
+                fontSize = 22.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
             track.albumTitle?.let {
                 Text(text = it, fontSize = 16.sp, color = Color.Gray, textAlign = TextAlign.Center)
             }
-            Text(text = track.artistName, fontSize = 18.sp, color = Color.White, textAlign = TextAlign.Center)
+            Text(
+                text = track.artistName,
+                fontSize = 18.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
             Spacer(modifier = Modifier.height(30.dp))
 
             Slider(
@@ -116,7 +129,11 @@ fun TrackDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = formatTime(state.currentPosition), fontSize = 14.sp, color = Color.White)
+                Text(
+                    text = formatTime(state.currentPosition),
+                    fontSize = 14.sp,
+                    color = Color.White
+                )
                 Text(text = formatTime(track.duration), fontSize = 14.sp, color = Color.White)
             }
             Spacer(modifier = Modifier.height(20.dp))
@@ -152,9 +169,17 @@ fun TrackDetailScreen(
                         tint = Color.White
                     )
                 }
+                Button(onClick = {onAction(TrackListAction.OnDownloadClick)}) {
+                    Text("Скачать трек")
+                }
             }
         }
-    } else if (state.isError){
+
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = "Скачанные треки", fontSize = 18.sp )
+
+    } else if (state.isError) {
         ReloadScreen { onAction(TrackListAction.OnBackClick(onClick)) }
     }
 }

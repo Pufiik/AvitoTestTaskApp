@@ -16,7 +16,6 @@ import ru.pugovishnikova.example.avitotesttaskapp.util.map
 import ru.pugovishnikova.example.avitotesttaskapp.domain.toTrack
 import ru.pugovishnikova.example.avitotesttaskapp.domain.toTrackInfo
 
-
 class TrackRepositoryImpl(
     private val trackService: TrackApiService
 ) : TrackRepository {
@@ -70,4 +69,5 @@ class TrackRepositoryImpl(
             )
         }
     }
+
 }

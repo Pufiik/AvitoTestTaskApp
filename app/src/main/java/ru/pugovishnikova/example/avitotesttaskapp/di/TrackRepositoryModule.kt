@@ -6,6 +6,7 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
+import androidx.room.Room
 import okhttp3.OkHttpClient
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -14,6 +15,7 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.pugovishnikova.example.avitotesttaskapp.BuildConfig
+//import ru.pugovishnikova.example.avitotesttaskapp.data.AppDatabase
 import ru.pugovishnikova.example.avitotesttaskapp.data.remote.TrackApiService
 import ru.pugovishnikova.example.avitotesttaskapp.data.repository.TrackRepositoryImpl
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackRepository
@@ -21,9 +23,12 @@ import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetAllTracksUs
 import ru.pugovishnikova.example.avitotesttaskapp.domain.TrackUseCases
 import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.SearchTracksUseCase
 import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.GetTrackByIdUseCase
+//import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.DownloadTrackUseCase
+//import ru.pugovishnikova.example.avitotesttaskapp.domain.usecases.UpdateTracksUseCase
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackService.TrackNotificationManager
-import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackService.TrackNotificationAdapter
 import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.TrackViewModel
+import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.DownloadViewModel
+import ru.pugovishnikova.example.avitotesttaskapp.presentation.trackList.SharedPlayerViewModel
 import java.util.concurrent.TimeUnit
 
 private fun provideHttpClient(): OkHttpClient {
@@ -70,7 +75,24 @@ private fun provideRetrofit(
 private fun provideService(retrofit: Retrofit): TrackApiService =
     retrofit.create(TrackApiService::class.java)
 
-
+//val databaseModule = module {
+//
+//    single {
+//        provideDatabase(get())
+//    }
+//
+//    single {
+//        get<AppDatabase>().downloadedTrackDao()
+//    }
+//}
+//
+//fun provideDatabase(context: Context): AppDatabase {
+//    return Room.databaseBuilder(
+//        context.applicationContext,
+//        AppDatabase::class.java,
+//        "downloaded_tracks_db"
+//    ).build()
+//}
 
 val networkModule = module {
     singleOf(::provideHttpClient)
@@ -99,11 +121,15 @@ val repositoryModule = module {
 }
 
 val viewModelModule = module {
+    viewModelOf(::SharedPlayerViewModel)
+    viewModelOf(::DownloadViewModel)
     viewModelOf(::TrackViewModel)
 }
 
 
 val useCasesModule = module {
+//    singleOf(::UpdateTracksUseCase)
+//    singleOf(::DownloadTrackUseCase)
     singleOf(::GetAllTracksUseCase)
     singleOf(::SearchTracksUseCase)
     singleOf(::GetTrackByIdUseCase)
